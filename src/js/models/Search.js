@@ -1,0 +1,1 @@
+export default 'iam an exported string';

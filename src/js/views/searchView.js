@@ -1,105 +1,115 @@
-import { elements } from './base'
-export const getInput = () => elements.searchInput.value;
+import {elements} from './base';
+
+export const getInput = () => elements.searchInput.value
+// return the value of the search input
 
 export const clearInput = () => {
     elements.searchInput.value = '';
 }
 
-export const clearResult = () => {
-    elements.searchResList.innerHTML = '';
-    elements.searchResPages.innerHTML = '';
+export const clearResults = () => {
+    elements.searchResList.innerHTML = "";
+    elements.searchResPages.innerHTML = "";
 }
 
-/*
-// eg, [pasta, with, tomato, and, spinach] 
-acc: 0 / acc + cur.lenght = 5 / new Title = ['pasta'];
-acc: 5 / acc + cur.lenght = 9 / new Title = ['pasta', 'with'];
-acc: 9 / acc + cur.lenght = 15 / new Title = ['pasta', 'with', 'tomato'];
-acc: 15 / acc + cur.lenght = 18 / new Title = ['pasta', 'with', 'tomato'];
-acc: 18 / acc + cur.lenght = 24 / new Title = ['pasta', 'with', 'tomato'];
-*/
+export const highlightSelected = id => {
+    const resultsArr = Array.from(document.querySelectorAll('.likes__link'));
+    resultsArr.forEach(el => {
+        el.classList.remove('results__link--active');
+    });
 
+    document.querySelector(`a[href*="${id}"]`).classList.add('results__link--active');
+};
+
+
+// 'pasta with tomato and spinach'
+// split(' ') is to create an array that contains each word between the space.
+
+// acc: 0 / acc + cur.length = 5 / newTitle = ['pasta']
+// acc: 5 / acc + cur.length = 9 / newTitle = ['pasta with'];
+// acc: 9 / acc + cur.length = 15 / newTitle = ['pasta with tomato']'
 const limitRecipeTitle = (title, limit = 17) => {
     const newTitle = [];
+    // !!! save mulitple times from the below reduce function ( how? )
+
     if(title.length > limit) {
         title.split(' ').reduce((acc, cur) => {
-            if(acc + cur.length <= limit) {
+            if(acc + cur.length <=limit) {
                 newTitle.push(cur);
             }
-
             return acc + cur.length;
+            // this makes acc = acc + cur.length.
         }, 0);
 
-        // return the result
-        console.log(`${newTitle}`);
-
-        return `${newTitle.join(" ")} ...`;
+        return `${newTitle.join(' ')} ...`;
     } 
     return title;
 }
-export const renderRecipes = recipe => {
-    console.log("working!!!");
+
+const renderRecipe = recipe =>  {
     const markup = `
-    <li>
-        <a class="results__link" href="#${recipe.recipes_id}"">
-            <figure class="results__fig">
-                <img src="${recipe.image_url}" alt="${recipe.title}">
-            </figure>
-            <div class="results__data">
-                <h4 class="results__name">${limitRecipeTitle(recipe.title)}</h4>
-                <p class="results__author">${recipe.publisher}</p>
-            </div>
-        </a>
-    </li>
+        <li>
+            <a class="likes__link" href="#${recipe.recipe_id}">
+                <figure class="likes__fig">
+                    <img src="${recipe.image_url}" alt="${recipe.title}">
+                </figure>
+                <div class="likes__data">
+                    <h4 class="likes__name">${limitRecipeTitle(recipe.title)}</h4>
+                    <p class="likes__author">${recipe.publisher}</p>
+                </div>
+            </a>
+        </li>
     `;
-    elements.searchResList.insertAdjacentHTML('beforeend', markup);
+    elements.searchResList.insertAdjacentHTML("beforeend", markup);
 }
 
-// type: 'prev' or 'next
-const createButton = (page, type) => 
-    `
+
+// type: 'prev' or 'next'
+const createButton = (page, type) => `
     <button class="btn-inline results__btn--${type}" data-goto=${type === 'prev' ? page -1 : page + 1}>
-        <span>Page ${type === 'prev' ? page -1 : page + 1}</span>    
         <svg class="search__icon">
             <use href="img/icons.svg#icon-triangle-${type === 'prev' ? 'left' : 'right'}"></use>
         </svg>
-    
+        <span>Page ${type === 'prev' ? page -1 : page + 1}</span>
     </button>
-    `
-
+`
 const renderButtons = (page, numResults, resPerPage) => {
-    const pages = Math.ceil(numResults / resPerPage);
-    // round up
+    const pages = Math.ceil(numResults/resPerPage);
+    // Math ceil -> round up
+
 
     let button;
     if(page === 1 && pages > 1) {
-        button = createButton(page, 'next')
-        // button to go to next page
+        //Button to go to next page
+        button = createButton(page, 'next');
     } else if(page < pages) {
-        // both buttons
         button = `
             ${createButton(page, 'prev')}
             ${createButton(page, 'next')}
         `
     } else if(page === pages && pages > 1) {
-        // only button to go to prev page
-        button = createButton(page, 'prev')
+        button = createButton(page, 'prev');
+
     }
-    elements.searchResPages.insertAdjacentHTML('afterbegin', button);
+
+    elements.searchResPages.insertAdjacentHTML("afterbegin", button);
 };
 
-export const renderResults = (recipes, page = 1, resPerPage = 10) => {
-    
-    //render results of current page
-    const start = (page - 1) * resPerPage;
-    const end = 9;
-   
-    // start at 'start' index and "end" means number of recipes
-    recipes.slice(start, end).forEach(renderRecipes);
+// recipes is an array and use the forEach function with renderRecipe callback function to show all recipes stored inside of the recipes array. 
+export const renderResults = (recipes, page = 2, resPerPage = 10) => {
+    // render result of current page
+    const start = (page -1) * resPerPage; 
+    const end = page * resPerPage;
 
-    
 
-    //render pagination buttons
+    recipes.slice(start,end).forEach(renderRecipe);
+    // return a shallow copy of a portion of an array into a new array
+
+
+    // render pagination buttons
+    console.log(recipes.length);
+    console.log(resPerPage);
     renderButtons(page, recipes.length, resPerPage);
-
 }
+// callback function, a function that is passed as an arguement. 
+// renderRecipe is a call back function.

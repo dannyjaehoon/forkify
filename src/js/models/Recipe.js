@@ -81,7 +81,6 @@ export default class Recipe {
                     ingredient
                 }
             }
-            console.log(objIng);
             return objIng;
         });
         this.ingredients = newIngredients;
@@ -90,7 +89,6 @@ export default class Recipe {
     updateServings (type) {
         // servings
         const newServings = type === 'dec' ? this.servings -1 : this.servings +1;
-        console.log(newServings);
         // Ingredients
         this.ingredients.forEach(ing => {
             ing.count = ing.count * (newServings / this.servings);
